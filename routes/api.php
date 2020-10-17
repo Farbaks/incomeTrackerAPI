@@ -18,3 +18,16 @@ use App\Http\Controllers\UserController;
 */
 Route::post('users/signup', [UserController::class, 'signup']);
 Route::post('users/signin', [UserController::class, 'signin']);
+Route::post('users/reset', [UserController::class, 'resetPassword']); 
+
+Route::middleware('user-auth')->group(function () {
+    // User api
+    Route::get('users/', [UserController::class, 'getAllUsers']);
+    Route::get('users/{id}', [UserController::class, 'getOneUser']);
+    Route::post('users/', [UserController::class, 'updateUser']);
+    Route::post('users/profilepicture', [UserController::class, 'updateProfilePicture']);
+    Route::post('users/removeprofilepicture', [UserController::class, 'deleteProfilePicture']);
+    Route::post('users/notification', 'UserController@'); //Not done
+    Route::post('users/signout', [UserController::class, 'signout']); 
+    Route::delete('users/', 'UserController@'); //Not done
+});

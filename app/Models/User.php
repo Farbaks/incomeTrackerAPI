@@ -23,7 +23,6 @@ class User extends Authenticatable
         'pictureUrl',
         'companyName',
         'companyAddress',
-        'apiToken',
         'password',
     ];
 
@@ -33,7 +32,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'id','password', 'remember_token','apiToken', 'created_at', 'updated_at', 'email_verified_at'
+        'id','password', 'remember_token','created_at', 'updated_at', 'email_verified_at'
     ];
 
     /**
