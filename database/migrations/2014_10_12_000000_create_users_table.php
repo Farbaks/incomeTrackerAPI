@@ -23,7 +23,6 @@ class CreateUsersTable extends Migration
             $table->text('companyAddress');
             $table->string('password');
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('apiToken')->nullable();
             $table->timestamps();
         });
     }

@@ -234,6 +234,7 @@ class UserController extends Controller
                 $user
             ]
         ], 200);
+    
     }
 
     // function to reset password

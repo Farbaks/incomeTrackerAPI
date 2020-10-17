@@ -16,3 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/resetmail', function() {
+    $user = array([
+        'name' => 'James'
+    ]);
+    return view('resetpasswordmail', ['name' => 'James']);
+});
