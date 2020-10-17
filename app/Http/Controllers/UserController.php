@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Models\Job;
+use Event;
+use App\Events\ResetPassword;
 
 class UserController extends Controller
 {
@@ -143,6 +145,194 @@ class UserController extends Controller
         ], 200);
 
 
+        if ($data->fails()) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'All fields are required',
+                'data' => []
+            ], 400);
+        }
+
+        if ($request->id != $request->userID) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Not authorized to carry out this action',
+                'data' => []
+            ], 400);
+        }
+
+        $name = $request->id . ".jpg";
+        $path = $request->file('avatar')->storeAs('avatars', $name, 'public');
+        User::find($request->id)->update([
+            'pictureUrl' => asset('storage/' . $path)
+        ]);
+        $user = User::find($request->id);
+        $user->totalTobs = Job::where('userId', $user->id)->count();
+        $user->pendingJobs = Job::where('userId', $user->id)
+            ->where('status', '!=', 'completed')
+            ->where('status', '!=', 'canceled')
+            ->count();
+        $user->completedJobs = Job::where('userId', $user->id)
+            ->where('status', 'completed')
+            ->count();
+        $user->canceledJobs =  Job::where('userId', $user->id)
+            ->where('status', 'canceled')
+            ->count();
+        return response()->json([
+            'status' => 200,
+            'message' => 'User account has been updated',
+            'data' => [
+                // User::find($request->id)->only('id', 'name', 'email', 'phoneNumber','bio', 'pictureUrl'),
+                $user
+            ]
+        ], 200);
+    }
+
+    // function to delete user profile picture
+    public function deleteProfilePicture(Request $request)
+    {
+        $data = Validator::make($request->all(), [
+            'id' => 'required'
+        ]);
+
+        if ($data->fails()) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'All fields are required',
+                'data' => []
+            ], 400);
+        }
+
+        if ($request->id != $request->userID) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Not authorized to carry out this action',
+                'data' => []
+            ], 400);
+        }
+        Storage::delete($request->id . '.jpg');
+        User::find($request->id)->update([
+            'pictureUrl' => null
+        ]);
+        $user = User::find($request->id);
+        $user->totalTobs = Job::where('userId', $user->id)->count();
+        $user->pendingJobs = Job::where('userId', $user->id)
+            ->where('status', '!=', 'completed')
+            ->where('status', '!=', 'canceled')
+            ->count();
+        $user->completedJobs = Job::where('userId', $user->id)
+            ->where('status', 'completed')
+            ->count();
+        $user->canceledJobs =  Job::where('userId', $user->id)
+            ->where('status', 'canceled')
+            ->count();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'User account has been updated',
+            'data' => [
+                $user
+            ]
+        ], 200);
+    }
+
+    // function to reset password
+    public function resetPassword(Request $request)
+    {
+        $data = Validator::make($request->all(), [
+            'email' => 'required'
+        ]);
+
+        if ($data->fails()) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'All fields are required',
+                'data' => []
+            ], 400);
+        }
+        $tempPassword = Str::random(8);
+        $user = User::where('email', $request->email)->first();
+
+        if ($user == "") {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Email does not exist',
+                'data' => []
+            ], 400);
+        }
+        $user->update([
+            'password' => Hash::make($tempPassword)
+        ]);
+        $data = $user;
+        $data->tempPassword = $tempPassword;
+        event(new ResetPassword($data));
+        return response()->json([
+            'status' => 200,
+            'message' => 'Password reset mail has been sent',
+            'data' => []
+        ], 200);
+    }
+
+    // function to update user password
+    public function changePassword(Request $request)
+    {
+        $data = Validator::make($request->all(), [
+            'id' => 'required',
+            'oldPassword' => 'required',
+            'newPassword' => 'required',
+        ]);
+
+        if ($data->fails()) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'All fields are required',
+                'data' => []
+            ], 400);
+        }
+
+        if ($request->id != $request->userID) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Not authorized to carry out this action',
+                'data' => []
+            ], 400);
+        }
+
+        $user = User::find($request->id);
+        
+        // Check if password is correct
+        if (!Hash::check($request->oldPassword, $user->password)) {
+            // The passwords don't match...
+            return response()->json([
+                'status' => 400,
+                'message' => 'Old password is incorrect',
+                'data' => []
+            ], 400);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->newPassword)
+        ]);
+
+        $user->totalTobs = Job::where('userId', $user->id)->count();
+        $user->pendingJobs = Job::where('userId', $user->id)
+            ->where('status', '!=', 'completed')
+            ->where('status', '!=', 'canceled')
+            ->count();
+        $user->completedJobs = Job::where('userId', $user->id)
+            ->where('status', 'completed')
+            ->count();
+        $user->canceledJobs =  Job::where('userId', $user->id)
+            ->where('status', 'canceled')
+            ->count();
+        return response()->json([
+            'status' => 200,
+            'message' => 'User account has been updated',
+            'data' => [
+                // User::find($request->id)->only('id', 'name', 'email', 'phoneNumber','bio', 'pictureUrl'),
+                $user
+            ]
+        ], 200);
     }
 
     // Function to generate API token
