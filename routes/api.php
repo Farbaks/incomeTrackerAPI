@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\JobController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,8 @@ Route::post('users/signup', [UserController::class, 'signup']);
 Route::post('users/signin', [UserController::class, 'signin']);
 Route::post('users/reset', [UserController::class, 'resetPassword']); 
 
+Route::get('quotation', [JobController::class, 'downloadQuotation']); 
+
 Route::middleware('user-auth')->group(function () {
     // User api
     Route::get('users/', [UserController::class, 'getAllUsers']);
@@ -31,5 +34,12 @@ Route::middleware('user-auth')->group(function () {
     Route::post('users/signout', [UserController::class, 'signout']); 
 
     // Jobs api
-    Route::post('job/', [JobController::class, 'getAllUsers']);
+    Route::post('jobs/new', [JobController::class, 'createJob']);
+    Route::post('jobs/', [JobController::class, 'editJob']);
+    Route::get('jobs/', [JobController::class, 'getAllJobs']);
+    Route::get('job/{id}', [JobController::class, 'getJob']);
+    Route::post('quotation/new', [JobController::class, 'createQuotation']);
+    Route::post('quotation/', [JobController::class, 'editQuotation']);
+    Route::get('jobs/report', [JobController::class, 'getReport']); 
+    
 });

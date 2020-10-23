@@ -22,3 +22,6 @@ Route::get('/resetmail', function() {
     ]);
     return view('resetpasswordmail', ['name' => 'James']);
 });
+Route::get('/quotation', function() {
+    return view('quotationtemplate1');
+});
