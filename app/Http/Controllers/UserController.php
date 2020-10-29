@@ -239,6 +239,35 @@ class UserController extends Controller
     }
 
     // function to fetch one user
+    public function getThisUser(Request $request)
+    {
+        $user = User::find($request->userID);
+        if ($user == '') {
+            return response()->json([
+                'status' => 400,
+                'message' => 'This user does not exist',
+                'data' => []
+            ], 400);
+        }
+        $user->totalTobs = Job::where('userId', $user->id)->count();
+        $user->pendingJobs = Job::where('userId', $user->id)
+            ->where('status', '!=', 'completed')
+            ->where('status', '!=', 'canceled')
+            ->count();
+        $user->completedJobs = Job::where('userId', $user->id)
+            ->where('status', 'completed')
+            ->count();
+        $user->canceledJobs =  Job::where('userId', $user->id)
+            ->where('status', 'canceled')
+            ->count();
+        return response()->json([
+            'status' => 200,
+            'message' => 'User account has been fetched',
+            'data' => $user
+        ], 200);
+    }
+
+    // function to fetch one user
     public function getOneUser(Request $request, $id)
     {
         $user = User::find($id);

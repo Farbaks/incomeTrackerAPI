@@ -22,10 +22,9 @@ class checkUserAuth
 
         if(!$encrypted){
             return response()->json([
-                'status' => 'error',
-                'error' => [
-                    'message' => 'No token sent in request'
-                ]
+                'status' => 400,
+                'message' => 'No token sent in request',
+                'data' => []
             ], 400);
         }
         try {
@@ -35,7 +34,7 @@ class checkUserAuth
             
             return response()->json([
                 'status' => 400,
-                'message' => 'Not authorized to view this',
+                'message' => 'Invalid token',
                 'data' => []
             ], 400);
         }

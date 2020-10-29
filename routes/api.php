@@ -26,6 +26,7 @@ Route::get('quotation', [JobController::class, 'downloadQuotation']);
 Route::middleware('user-auth')->group(function () {
     // User api
     Route::get('users/', [UserController::class, 'getAllUsers']);
+    Route::get('user/', [UserController::class, 'getThisUser']);
     Route::get('users/{id}', [UserController::class, 'getOneUser']);
     Route::post('users/', [UserController::class, 'updateUser']);
     Route::post('users/profilepicture', [UserController::class, 'updateProfilePicture']);
@@ -35,8 +36,8 @@ Route::middleware('user-auth')->group(function () {
 
     // Jobs api
     Route::post('jobs/new', [JobController::class, 'createJob']);
-    Route::post('jobs/', [JobController::class, 'editJob']);
-    Route::get('jobs/', [JobController::class, 'getAllJobs']);
+    Route::put('jobs/', [JobController::class, 'editJob']);
+    Route::post('jobs/', [JobController::class, 'getAllJobs']);
     Route::get('job/{id}', [JobController::class, 'getJob']);
     Route::post('quotation/new', [JobController::class, 'createQuotation']);
     Route::post('quotation/', [JobController::class, 'editQuotation']);

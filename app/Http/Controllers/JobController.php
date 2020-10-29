@@ -119,7 +119,7 @@ class JobController extends Controller
         ];
         return response()->json([
             'status' => 200,
-            'message' => 'Job has been created successfully',
+            'message' => 'Job has been updated successfully',
             'data' => $job
         ], 200);
     }
@@ -164,8 +164,8 @@ class JobController extends Controller
             $job->quotation = "Quotation has already been created";
             return response()->json([
                 'status' => 400,
-                'message' => 'Job has been updated successfully',
-                'data' => $job
+                'message' => 'Quotation has already been created',
+                'data' => []
             ], 400);
         }
 
@@ -288,8 +288,8 @@ class JobController extends Controller
             $job->quotation = "Quotation has not been created";
             return response()->json([
                 'status' => 400,
-                'message' => 'Job has been updated successfully',
-                'data' => $job
+                'message' => 'Quotation has not been created',
+                'data' => []
             ], 400);
         }
 
@@ -435,6 +435,8 @@ class JobController extends Controller
                 'data' => []
             ], 400);
         }
+        $jobCount = Job::where('userId', $request->userID)->latest()
+            ->count();
 
         $jobs = Job::where('userId', $request->userID)->latest()
             ->offset($request->offset)
@@ -479,6 +481,9 @@ class JobController extends Controller
         return response()->json([
             'status' => 200,
             'message' => 'Quotation has been updated successfully',
+            "totalJobCount" => $jobCount,
+            "offset" => $request->offset,
+            "limit" => $request->limit,
             'data' => $jobs
         ], 200);
     }
@@ -490,12 +495,17 @@ class JobController extends Controller
         $report['totalIncome'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
             ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
             ->sum('quotations.profit');
-        $report['data'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
+        $report['currency'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
             ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
-            ->selectRaw('month(jobs.created_at) as month')
+            ->select('quotations.currency')->first()->currency;
+        $report['report'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
+            ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
+            ->selectRaw('monthname(jobs.created_at) as month')
             ->selectRaw('year(jobs.created_at) as year')
             ->selectRaw('count(jobs.id) as numOfJobs')
+            // 
             ->selectRaw('sum(quotations.profit) as income')
+
             ->groupBy('month', 'year')
             ->latest('jobs.created_at')
             ->get();
@@ -509,9 +519,9 @@ class JobController extends Controller
 
     // function to download quotation/invoice
     public function downloadQuotation(Request $request)
-    {   
+    {
         $pdf = PDF::loadView('quotationtemplate1');
-        
+
         // download PDF file with download method
         return $pdf->download('Quotation.pdf');
     }
