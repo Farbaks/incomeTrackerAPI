@@ -26,6 +26,7 @@ class UserController extends Controller
             'companyName' => 'required',
             'companyAddress' => 'required',
             'password' => 'required',
+            'deviceId' => 'required'
         ]);
 
         if ($data->fails()) {
@@ -88,7 +89,7 @@ class UserController extends Controller
         return response()->json([
             'status' => 200,
             'message' => 'User account has been created',
-            'apiToken' => $this->generateAPI($user->id),
+            'apiToken' => $this->generateAPI($user->id, $request->deviceId),
             'data' => [
                 $user
             ]
@@ -102,6 +103,7 @@ class UserController extends Controller
         $data = Validator::make($request->all(), [
             'email' => 'required',
             'password' => 'required',
+            'deviceId' => 'required'
         ]);
 
         if ($data->fails()) {
@@ -147,7 +149,7 @@ class UserController extends Controller
         return response()->json([
             'status' => 200,
             'message' => 'Login succesful',
-            'apiToken' => $this->generateAPI($user->id),
+            'apiToken' => $this->generateAPI($user->id, $request->deviceId),
             'data' => [
                 $user
             ]
@@ -571,20 +573,32 @@ class UserController extends Controller
     }
 
     // Function to generate API token
-    public function generateAPI($id)
+    public function generateAPI($id, $deviceId)
     {
         $token = Str::random(60);
-
-        User::find($id)
-            ->update([
-                'apiToken' => $token
-            ]);
-
         $note = [
             'apiToken' => $token,
-            'id' => $id
+            'userId' => $id,
+            'deviceId' => $deviceId
         ];
         $encrypted = Crypt::encrypt($note);
         return $encrypted;
+
+        $check = Login::where('userId', $id)->where('deviceId', $deviceId)->first();
+        if ($check == "") {
+            $newLogin = new Login;
+            $newLogin->userId = $id;
+            $newLogin->apiToken = $token;
+            $newLogin->deviceId = $deviceId;
+            $newLogin->save();
+
+            return $encrypted;
+        } else {
+            $check->update([
+                'apiToken' => $token
+            ]);
+
+            return $encrypted;
+        }
     }
 }
