@@ -582,7 +582,6 @@ class UserController extends Controller
             'deviceId' => $deviceId
         ];
         $encrypted = Crypt::encrypt($note);
-        return $encrypted;
 
         $check = Login::where('userId', $id)->where('deviceId', $deviceId)->first();
         if ($check == "") {
