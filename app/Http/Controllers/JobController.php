@@ -495,9 +495,13 @@ class JobController extends Controller
         $report['totalIncome'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
             ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
             ->sum('quotations.profit');
-        $report['currency'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
+        $check = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
             ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
-            ->select('quotations.currency')->first()->currency;
+            ->select('quotations.currency')->first();
+        $report['currency'] = null;
+        if ($check != "") {
+            $report['currency'] = $check->currency;
+        }
         $report['report'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
             ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
             ->selectRaw('monthname(jobs.created_at) as month')
