@@ -35,7 +35,7 @@ class Quotation extends Model
      *
      * @var array
      */
-    protected $hidden = [
-        'id', 'created_at', 'updated_at'
-    ];
+    // protected $hidden = [
+    //     'id', 'created_at', 'updated_at'
+    // ];
 }

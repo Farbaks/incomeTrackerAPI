@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\JobController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,15 +14,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-Route::get('/resetmail', function() {
-    $user = array([
-        'name' => 'James'
-    ]);
-    return view('resetpasswordmail', ['name' => 'James']);
-});
-Route::get('/quotation', function() {
-    return view('quotationtemplate1');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+// Route::get('/resetmail', function() {
+//     $user = array([
+//         'name' => 'James'
+//     ]);
+//     return view('resetpasswordmail', ['name' => 'James']);
+// });
+Route::get('/job/{jobId}/{type}', [JobController::class, 'viewQuotation']);

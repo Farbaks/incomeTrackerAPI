@@ -137,7 +137,11 @@
             <table align='center' role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='margin: auto;'>
                 <tr>
                     <td valign='middle' style='padding: 60px 20px 10px 20px;text-align: right;'>
+                        @if ($type == "quotation")
+                        <h2><strong>QUOTATION</strong></h2>
+                        @else
                         <h2><strong>INVOICE</strong></h2>
+                        @endif
                     </td>
                 </tr>
                 <tr>
@@ -145,12 +149,16 @@
                         <table style="width: 100%;">
                             <tr>
                                 <td style="text-align: left;">
-                                    <img src="{{ asset('storage/avatars/2.jpg') }}" style='width:130px;align-items: center;' class='CToWUd'>
+                                    <img src="{{ $user['pictureUrl'] ||null }}" style='width:130px;align-items: center;' class='CToWUd'>
                                 </td>
                                 <td style="text-align: right;">
-                                    <p>Date: [Date]</p>
-                                    <p>Quotation No: [#No]</p>
-                                    <p>Quotation Validity: [Number of days]</p>
+                                    <p>Date: {{ $job->quotation['quotationDetails']['updated_at']->format('d/m/y')}}</p>
+                                    @if ($type == "quotation")
+                                    <p>Quotation No: {{ $job->quotation['quotationDetails']['id']}}</p>
+                                    <p>Quotation Validity: {{ $job->quotation['quotationDetails']['quotationValidity'] }} days</p>
+                                    @else
+                                    <p>Invoice No: {{ $job->quotation['quotationDetails']['id']}}</p>
+                                    @endif
                                 </td>
                             </tr>
                         </table>
@@ -161,21 +169,23 @@
                         <table style="width: 100%;">
                             <tr>
                                 <td style="text-align: left;">
-                                    <p>From: [Company Name]</p>
-                                    <p>[Address]</p>
-                                    <p>[Phone Number]</p>
-                                    <p>[E-mail]</p>
+                                    <p>From: {{ $user['companyName'] }}</p>
+                                    <p>{{ $user['companyAddress'] }}</p>
+                                    <p>{{ $user['phoneNumber'] }}</p>
+                                    <p>{{ $user['email'] }}</p>
                                 </td>
                                 <td style="text-align: right;">
-                                    <p>To: [Company Name]</p>
-                                    <p>[Address]</p>
-                                    <p>[Phone Number]</p>
-                                    <p>[E-mail]</p>
+                                    <p>To: {{ $job['contactName'] }}</p>
+                                    <p>{{ $job['companyName'] }}</p>
+                                    <p>{{ $job['companyAddress'] }}</p>
+                                    <p>{{ $job['contactNumber'] }}</p>
+                                    <!-- <p>[E-mail]</p> -->
                                 </td>
                             </tr>
                         </table>
                     </td>
                 </tr>
+                @if ($type == "quotation")
                 <tr>
                     <td valign='middle' style='padding: 10px 20px 20px 20px;'>
                         <table style='width: 100%;'>
@@ -198,22 +208,23 @@
                             <tbody>
                                 <tr>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Faysal Bakre
+                                        {{ $job->quotation['quotationDetails']['salesPerson'] }}
                                     </td>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        12343214
+                                        {{ $job->quotation['quotationDetails']['refNumber'] }}
                                     </td>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        None
+                                        {{ $job->quotation['quotationDetails']['paymentTerms'] }}
                                     </td>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        None
+                                        {{ $job->quotation['quotationDetails']['deliveryDate'] }}
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </td>
                 </tr>
+                @endif
                 <tr>
                     <td valign='middle' style='padding: 10px 20px 0px 20px;'>
                         <table style='width: 100%;'>
@@ -235,131 +246,33 @@
                                         Quantity
                                     </th>
                                     <th style='padding: 7px; background-color: teal;color: white; border-right: solid 1px white;text-align: left;'>
-                                        Sub-Total
+                                        Amount
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
+                                @foreach ($job->quotation['items']['itemList'] as $item)
                                 <tr>
                                     <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
+                                        {{ $loop->index + 1 }}
                                     </td>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
+                                        {{ $item->itemName }}
                                     </td>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
+                                        {{ $item->UOM }}
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($item->unitPrice, 2) }}
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: center;'>
+                                        {{ $item->quantity }}
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($item->totalPrice, 2)  }}
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
-                                    </td>
-                                </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </td>
@@ -373,35 +286,39 @@
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
                                         <strong>Sub Total:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($job->quotation['quotationDetails']['subTotalJobCost'], 2)  }}
                                     </td>
                                 </tr>
+                                @foreach ($job->quotation['tax']['taxList'] as $tax)
                                 <tr>
                                     <td style="width:30px;padding: 7px;"></td>
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
-                                        <strong>VAT:</strong>
+                                        <strong>{{ $tax->paymentName }}:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000 (7%)
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($tax->amount, 2)  }}
                                     </td>
                                 </tr>
+                                @endforeach
+                                @foreach ($job->quotation['discount']['discountList'] as $discount)
                                 <tr>
                                     <td style="width:30px;padding: 7px;"></td>
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
-                                        <strong>Discount:</strong>
+                                        <strong>{{ $discount->paymentName }}:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($discount->amount, 2)  }}
                                     </td>
                                 </tr>
+                                @endforeach
                                 <tr>
                                     <td style="width:30px;padding: 7px;"></td>
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
                                         <strong>Total:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($job->quotation['quotationDetails']['totalJobCost'], 2)  }}
                                     </td>
                                 </tr>
                             </tbody>
@@ -414,12 +331,17 @@
                             <tbody>
                                 <tr>
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: left;' colspan="4">
-                                        Quotation prepared by:
+                                        {{ $job->quotation['quotationDetails']['comment'] }}
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: left;' colspan="4">
-                                        Direct All Inquiries to: Kismetgate2@yahoo.com
+                                        Quotation prepared by: {{ $job->quotation['quotationDetails']['salesPerson'] }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: left;' colspan="4">
+                                        Direct All Inquiries to: {{ $user['email'] }}
                                     </td>
                                 </tr>
                             </tbody>

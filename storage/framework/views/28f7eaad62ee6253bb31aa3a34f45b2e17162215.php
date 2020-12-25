@@ -137,7 +137,11 @@
             <table align='center' role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='margin: auto;'>
                 <tr>
                     <td valign='middle' style='padding: 60px 20px 10px 20px;text-align: right;'>
+                        <?php if($type == "quotation"): ?>
+                        <h2><strong>QUOTATION</strong></h2>
+                        <?php else: ?>
                         <h2><strong>INVOICE</strong></h2>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <tr>
@@ -145,12 +149,16 @@
                         <table style="width: 100%;">
                             <tr>
                                 <td style="text-align: left;">
-                                    <img src="<?php echo e(asset('storage/avatars/2.jpg')); ?>" style='width:130px;align-items: center;' class='CToWUd'>
+                                    <img src="<?php echo e($user['pictureUrl'] ||null); ?>" style='width:130px;align-items: center;' class='CToWUd'>
                                 </td>
                                 <td style="text-align: right;">
-                                    <p>Date: [Date]</p>
-                                    <p>Quotation No: [#No]</p>
-                                    <p>Quotation Validity: [Number of days]</p>
+                                    <p>Date: <?php echo e($job->quotation['quotationDetails']['updated_at']->format('d/m/y')); ?></p>
+                                    <?php if($type == "quotation"): ?>
+                                    <p>Quotation No: <?php echo e($job->quotation['quotationDetails']['id']); ?></p>
+                                    <p>Quotation Validity: <?php echo e($job->quotation['quotationDetails']['quotationValidity']); ?> days</p>
+                                    <?php else: ?>
+                                    <p>Invoice No: <?php echo e($job->quotation['quotationDetails']['id']); ?></p>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         </table>
@@ -161,21 +169,23 @@
                         <table style="width: 100%;">
                             <tr>
                                 <td style="text-align: left;">
-                                    <p>From: [Company Name]</p>
-                                    <p>[Address]</p>
-                                    <p>[Phone Number]</p>
-                                    <p>[E-mail]</p>
+                                    <p>From: <?php echo e($user['companyName']); ?></p>
+                                    <p><?php echo e($user['companyAddress']); ?></p>
+                                    <p><?php echo e($user['phoneNumber']); ?></p>
+                                    <p><?php echo e($user['email']); ?></p>
                                 </td>
                                 <td style="text-align: right;">
-                                    <p>To: [Company Name]</p>
-                                    <p>[Address]</p>
-                                    <p>[Phone Number]</p>
-                                    <p>[E-mail]</p>
+                                    <p>To: <?php echo e($job['contactName']); ?></p>
+                                    <p><?php echo e($job['companyName']); ?></p>
+                                    <p><?php echo e($job['companyAddress']); ?></p>
+                                    <p><?php echo e($job['contactNumber']); ?></p>
+                                    <!-- <p>[E-mail]</p> -->
                                 </td>
                             </tr>
                         </table>
                     </td>
                 </tr>
+                <?php if($type == "quotation"): ?>
                 <tr>
                     <td valign='middle' style='padding: 10px 20px 20px 20px;'>
                         <table style='width: 100%;'>
@@ -198,22 +208,27 @@
                             <tbody>
                                 <tr>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Faysal Bakre
+                                        <?php echo e($job->quotation['quotationDetails']['salesPerson']); ?>
+
                                     </td>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        12343214
+                                        <?php echo e($job->quotation['quotationDetails']['refNumber']); ?>
+
                                     </td>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        None
+                                        <?php echo e($job->quotation['quotationDetails']['paymentTerms']); ?>
+
                                     </td>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        None
+                                        <?php echo e($job->quotation['quotationDetails']['deliveryDate']); ?>
+
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </td>
                 </tr>
+                <?php endif; ?>
                 <tr>
                     <td valign='middle' style='padding: 10px 20px 0px 20px;'>
                         <table style='width: 100%;'>
@@ -235,131 +250,39 @@
                                         Quantity
                                     </th>
                                     <th style='padding: 7px; background-color: teal;color: white; border-right: solid 1px white;text-align: left;'>
-                                        Sub-Total
+                                        Amount
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
+                                <?php $__currentLoopData = $job->quotation['items']['itemList']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
                                     <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
+                                        <?php echo e($loop->index + 1); ?>
+
                                     </td>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
+                                        <?php echo e($item->itemName); ?>
+
                                     </td>
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
+                                        <?php echo e($item->UOM); ?>
+
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        <?php echo e($job->quotation['quotationDetails']['currency']); ?> <?php echo e(number_format($item->unitPrice, 2)); ?>
+
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: center;'>
+                                        <?php echo e($item->quantity); ?>
+
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        <?php echo e($job->quotation['quotationDetails']['currency']); ?> <?php echo e(number_format($item->totalPrice, 2)); ?>
+
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        5
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Metal Pins
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        Rods
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 14,000
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        10
-                                    </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
-                                    </td>
-                                </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </td>
@@ -373,35 +296,43 @@
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
                                         <strong>Sub Total:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        <?php echo e($job->quotation['quotationDetails']['currency']); ?> <?php echo e(number_format($job->quotation['quotationDetails']['subTotalJobCost'], 2)); ?>
+
                                     </td>
                                 </tr>
+                                <?php $__currentLoopData = $job->quotation['tax']['taxList']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tax): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
                                     <td style="width:30px;padding: 7px;"></td>
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
-                                        <strong>VAT:</strong>
+                                        <strong><?php echo e($tax->paymentName); ?>:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000 (7%)
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        <?php echo e($job->quotation['quotationDetails']['currency']); ?> <?php echo e(number_format($tax->amount, 2)); ?>
+
                                     </td>
                                 </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php $__currentLoopData = $job->quotation['discount']['discountList']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $discount): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
                                     <td style="width:30px;padding: 7px;"></td>
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
-                                        <strong>Discount:</strong>
+                                        <strong><?php echo e($discount->paymentName); ?>:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        <?php echo e($job->quotation['quotationDetails']['currency']); ?> <?php echo e(number_format($discount->amount, 2)); ?>
+
                                     </td>
                                 </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
                                     <td style="width:30px;padding: 7px;"></td>
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
                                         <strong>Total:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
-                                        &#8358; 140,000
+                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        <?php echo e($job->quotation['quotationDetails']['currency']); ?> <?php echo e(number_format($job->quotation['quotationDetails']['totalJobCost'], 2)); ?>
+
                                     </td>
                                 </tr>
                             </tbody>
@@ -414,12 +345,20 @@
                             <tbody>
                                 <tr>
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: left;' colspan="4">
-                                        Quotation prepared by:
+                                        <?php echo e($job->quotation['quotationDetails']['comment']); ?>
+
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: left;' colspan="4">
-                                        Direct All Inquiries to: Kismetgate2@yahoo.com
+                                        Quotation prepared by: <?php echo e($job->quotation['quotationDetails']['salesPerson']); ?>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: left;' colspan="4">
+                                        Direct All Inquiries to: <?php echo e($user['email']); ?>
+
                                     </td>
                                 </tr>
                             </tbody>

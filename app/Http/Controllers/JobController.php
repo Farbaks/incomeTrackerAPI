@@ -23,7 +23,9 @@ class JobController extends Controller
     public function createJob(Request $request)
     {
         $data = Validator::make($request->all(), [
+            'jobName' => 'required|max:255',
             'companyName' => 'required|max:255',
+            'companyAddress' => 'required',
             'contactName' => 'required',
             'contactNumber' => 'required',
         ]);
@@ -36,7 +38,9 @@ class JobController extends Controller
             ], 400);
         }
         $job = new Job;
+        $job->jobName = $request->jobName;
         $job->companyName = $request->companyName;
+        $job->companyAddress = $request->companyAddress;
         $job->contactName = $request->contactName;
         $job->contactNumber = $request->contactNumber;
         $job->status = "Pending Quotation Creation";
@@ -47,24 +51,32 @@ class JobController extends Controller
         $job->userId = $request->userID;
 
         $job->save();
-        // $newJob = Job::find($job->id);
         $checkQuotation = Quotation::where('jobId', $job->id)->first();
 
         if ($checkQuotation == "") {
             $job->quotation = "Quotation has not been created";
-            return response()->json([
-                'status' => 200,
-                'message' => 'Job has been created successfully',
-                'data' => $job
-            ], 200);
+        } else {
+            $job->quotation = [
+                'quotationDetails' => Quotation::where('jobId', $job->id)->first(),
+                'items' => [
+                    'totalNumber' => Item::where('jobId', $job->id)->count(),
+                    'totalAmount' => Item::where('jobId', $job->id)->get('totalPrice')->sum('totalPrice'),
+                    'itemList' => Item::where('jobId', $job->id)->get(),
+                ],
+
+                'tax' => [
+                    'totalAmount' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->get('amount')->sum('amount'),
+                    'totalNumber' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->count(),
+                    'taxList' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->get()
+                ],
+                'discount' => [
+                    'totalAmount' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->get('amount')->sum('amount'),
+                    'totalNumber' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->count(),
+                    'discountList' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->get()
+                ]
+            ];
         }
 
-        $job->quotation = [
-            Quotation::where('jobId', $job->id)->first(),
-            'items' => Item::where('jobId', $job->id)->get(),
-            'tax' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->get(),
-            'discount' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->get()
-        ];
         return response()->json([
             'status' => 200,
             'message' => 'Job has been created successfully',
@@ -74,6 +86,101 @@ class JobController extends Controller
 
     //funciton to edit a job
     public function editJob(Request $request)
+    {
+        $data = Validator::make($request->all(), [
+            'id' => 'required|numeric',
+            'jobName' => 'required|max:255',
+            'companyName' => 'required|max:255',
+            'companyAddress' => 'required',
+            'contactName' => 'required',
+            'contactNumber' => 'required',
+        ]);
+
+        if ($data->fails()) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'All fields are required',
+                'data' => []
+            ], 400);
+        }
+
+        $job = Job::find($request->id);
+
+        if ($job == "") {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Job does not exist',
+                'data' => $job
+            ], 400);
+        }
+        $job->update([
+            'jobName' => $request->jobName,
+            'companyName' => $request->companyName,
+            'companyAddress' => $request->companyAddress,
+            'contactName' => $request->contactName,
+            'contactNumber' => $request->contactNumber,
+        ]);
+        if ($request->comment) {
+            $job->update([
+                'comment' => $request->comment
+            ]);
+        }
+
+        $checkQuotation = Quotation::where('jobId', $job->id)->first();
+
+        if ($checkQuotation == "") {
+            $job->quotation = "Quotation has not been created";
+        } else {
+            $job->quotation = [
+                'quotationDetails' => Quotation::where('jobId', $job->id)->first(),
+                'items' => [
+                    'totalNumber' => Item::where('jobId', $job->id)->count(),
+                    'totalAmount' => Item::where('jobId', $job->id)->get('totalPrice')->sum('totalPrice'),
+                    'itemList' => Item::where('jobId', $job->id)->get(),
+                ],
+
+                'tax' => [
+                    'totalAmount' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->get('amount')->sum('amount'),
+                    'totalNumber' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->count(),
+                    'taxList' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->get()
+                ],
+                'discount' => [
+                    'totalAmount' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->get('amount')->sum('amount'),
+                    'totalNumber' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->count(),
+                    'discountList' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->get()
+                ]
+            ];
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Job has been updated successfully',
+            'data' => $job
+        ], 200);
+    }
+
+    //funciton to delete a job
+    public function deleteJob($id)
+    {
+        $job = Job::find($id);
+
+        if ($job == "") {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Job does not exist',
+                'data' => $job
+            ], 400);
+        }
+        $job->delete();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Job has been deleted successfully',
+            'data' => []
+        ], 200);
+    }
+
+    //funciton to edit a job status
+    public function editJobStatus(Request $request)
     {
         $data = Validator::make($request->all(), [
             'jobId' => 'required|numeric',
@@ -105,21 +212,30 @@ class JobController extends Controller
 
         if ($checkQuotation == "") {
             $job->quotation = "Quotation has not been created";
-            return response()->json([
-                'status' => 200,
-                'message' => 'Job has been updated successfully',
-                'data' => $job
-            ], 200);
-        }
+        } else {
+            $job->quotation = [
+                'quotationDetails' => Quotation::where('jobId', $job->id)->first(),
+                'items' => [
+                    'totalNumber' => Item::where('jobId', $job->id)->count(),
+                    'totalAmount' => Item::where('jobId', $job->id)->get('totalPrice')->sum('totalPrice'),
+                    'itemList' => Item::where('jobId', $job->id)->get(),
+                ],
 
-        $job->quotation = [
-            Quotation::where('jobId', $job->id)->first(),
-            'items' => Item::where('jobId', $job->id),
-            'discount' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')
-        ];
+                'tax' => [
+                    'totalAmount' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->get('amount')->sum('amount'),
+                    'totalNumber' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->count(),
+                    'taxList' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->get()
+                ],
+                'discount' => [
+                    'totalAmount' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->get('amount')->sum('amount'),
+                    'totalNumber' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->count(),
+                    'discountList' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->get()
+                ]
+            ];
+        }
         return response()->json([
             'status' => 200,
-            'message' => 'Job has been updated successfully',
+            'message' => 'Job status has been updated successfully',
             'data' => $job
         ], 200);
     }
@@ -131,13 +247,11 @@ class JobController extends Controller
             'salesPerson' => 'required',
             'quotationValidity' => 'required',
             'paymentTerms' => 'required',
-            'currency' => 'required',
             'subTotalJobCost' => 'required',
             'totalJobCost' => 'required',
             'profit' => 'required',
             'jobId' => 'required|numeric',
             'items' => 'required',
-            'payments' => 'required'
         ]);
 
         if ($data->fails()) {
@@ -181,7 +295,7 @@ class JobController extends Controller
         if ($request->deliveryDate) {
             $quotation->deliveryDate = $request->deliveryDate;
         }
-        $quotation->currency = $request->currency;
+        $quotation->currency = User::find($request->userID)->currency;
         $quotation->subTotalJobCost = $request->subTotalJobCost;
         $quotation->totalJobCost = $request->totalJobCost;
         $quotation->profit = $request->profit;
@@ -206,18 +320,18 @@ class JobController extends Controller
                 'quotationId' => $quotation->id,
             ]);
         }
-
-        foreach ($request->payments as $payments) {
-            Payment::create([
-                'paymentName' => $payments['paymentName'],
-                'paymentType' => $payments['paymentType'],
-                'amount' => $payments['amount'],
-                'userId' => $request->userID,
-                'jobId' => $request->jobId,
-                'quotationId' => $quotation->id,
-            ]);
+        if ($request->payments) {
+            foreach ($request->payments as $payments) {
+                Payment::create([
+                    'paymentName' => $payments['paymentName'],
+                    'paymentType' => $payments['paymentType'],
+                    'amount' => $payments['amount'],
+                    'userId' => $request->userID,
+                    'jobId' => $request->jobId,
+                    'quotationId' => $quotation->id,
+                ]);
+            }
         }
-
         $job->update([
             'status' => "Pending Quotation Approval"
         ]);
@@ -255,13 +369,11 @@ class JobController extends Controller
             'salesPerson' => 'required',
             'quotationValidity' => 'required',
             'paymentTerms' => 'required',
-            'currency' => 'required',
             'subTotalJobCost' => 'required',
             'totalJobCost' => 'required',
             'profit' => 'required',
             'jobId' => 'required|numeric',
             'items' => 'required',
-            'payments' => 'required'
         ]);
 
         if ($data->fails()) {
@@ -285,7 +397,6 @@ class JobController extends Controller
         $quotation = Quotation::where('jobId', $job->id)->first();
 
         if ($quotation == "") {
-            $job->quotation = "Quotation has not been created";
             return response()->json([
                 'status' => 400,
                 'message' => 'Quotation has not been created',
@@ -304,7 +415,6 @@ class JobController extends Controller
         if ($request->deliveryDate) {
             $quotation->deliveryDate = $request->deliveryDate;
         }
-        $quotation->currency = $request->currency;
         $quotation->subTotalJobCost = $request->subTotalJobCost;
         $quotation->totalJobCost = $request->totalJobCost;
         $quotation->profit = $request->profit;
@@ -333,15 +443,17 @@ class JobController extends Controller
             ]);
         }
 
-        foreach ($request->payments as $payments) {
-            Payment::create([
-                'paymentName' => $payments['paymentName'],
-                'paymentType' => $payments['paymentType'],
-                'amount' => $payments['amount'],
-                'userId' => $request->userID,
-                'jobId' => $request->jobId,
-                'quotationId' => $quotation->id,
-            ]);
+        if ($request->payments) {
+            foreach ($request->payments as $payments) {
+                Payment::create([
+                    'paymentName' => $payments['paymentName'],
+                    'paymentType' => $payments['paymentType'],
+                    'amount' => $payments['amount'],
+                    'userId' => $request->userID,
+                    'jobId' => $request->jobId,
+                    'quotationId' => $quotation->id,
+                ]);
+            }
         }
 
         $job->quotation = [
@@ -371,7 +483,7 @@ class JobController extends Controller
     }
 
     //funciton to get one job
-    public function getJob($id)
+    public function getJob(Request $request, $id)
     {
         $job = Job::find($id);
 
@@ -382,40 +494,36 @@ class JobController extends Controller
                 'data' => $job
             ], 400);
         }
-
+        $job->currency = User::find($request->userID)->currency;
         $quotation = Quotation::where('jobId', $job->id)->first();
 
         if ($quotation == "") {
             $job->quotation = "Quotation has not been created";
-            return response()->json([
-                'status' => 200,
-                'message' => 'Job has been updated successfully',
-                'data' => $job
-            ], 200);
+        } else {
+            $job->quotation = [
+                'quotationDetails' => $quotation,
+                'items' => [
+                    'totalNumber' => Item::where('jobId', $job->id)->count(),
+                    'totalAmount' => Item::where('jobId', $job->id)->get('totalPrice')->sum('totalPrice'),
+                    'itemList' => Item::where('jobId', $job->id)->get(),
+                ],
+
+                'tax' => [
+                    'totalAmount' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->get('amount')->sum('amount'),
+                    'totalNumber' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->count(),
+                    'taxList' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->get()
+                ],
+                'discount' => [
+                    'totalAmount' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->get('amount')->sum('amount'),
+                    'totalNumber' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->count(),
+                    'discountList' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->get()
+                ]
+            ];
         }
 
-        $job->quotation = [
-            'quotationDetails' => $quotation,
-            'items' => [
-                'totalNumber' => Item::where('jobId', $job->id)->count(),
-                'totalAmount' => Item::where('jobId', $job->id)->get('totalPrice')->sum('totalPrice'),
-                'itemList' => Item::where('jobId', $job->id)->get(),
-            ],
-
-            'tax' => [
-                'totalAmount' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->get('amount')->sum('amount'),
-                'totalNumber' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->count(),
-                'taxList' => Payment::where('jobId', $job->id)->where('paymentType', 'tax')->get()
-            ],
-            'discount' => [
-                'totalAmount' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->get('amount')->sum('amount'),
-                'totalNumber' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->count(),
-                'discountList' => Payment::where('jobId', $job->id)->where('paymentType', 'discount')->get()
-            ]
-        ];
         return response()->json([
             'status' => 200,
-            'message' => 'Quotation has been updated successfully',
+            'message' => 'Job has been fetched successfully',
             'data' => $job
         ], 200);
     }
@@ -453,7 +561,7 @@ class JobController extends Controller
 
         foreach ($jobs as $job) {
             $quotation = Quotation::where('jobId', $job->id)->first();
-
+            $job->currency = User::find($request->userID)->currency;
             if ($quotation == "") {
                 $job->quotation = "Quotation has not been created";
             } else {
@@ -480,7 +588,7 @@ class JobController extends Controller
         }
         return response()->json([
             'status' => 200,
-            'message' => 'Quotation has been updated successfully',
+            'message' => 'Jobs have been fetched successfully',
             "totalJobCount" => $jobCount,
             "offset" => $request->offset,
             "limit" => $request->limit,
@@ -500,16 +608,14 @@ class JobController extends Controller
             ->select('quotations.currency')->first();
         $report['currency'] = null;
         if ($check != "") {
-            $report['currency'] = $check->currency;
+            $report['currency'] = User::find($request->userID)->currency;
         }
         $report['report'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
             ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
-            ->selectRaw('monthname(jobs.created_at) as month')
+            ->selectRaw('month(jobs.created_at) as month')
             ->selectRaw('year(jobs.created_at) as year')
             ->selectRaw('count(jobs.id) as numOfJobs')
-            // 
             ->selectRaw('sum(quotations.profit) as income')
-
             ->groupBy('month', 'year')
             ->latest('jobs.created_at')
             ->get();
@@ -520,13 +626,49 @@ class JobController extends Controller
             'data' => $report
         ], 200);
     }
-
-    // function to download quotation/invoice
-    public function downloadQuotation(Request $request)
+    // function to view quotation
+    public function viewQuotation(Request $request, $jobId, $type)
     {
-        $pdf = PDF::loadView('quotationtemplate1');
 
-        // download PDF file with download method
-        return $pdf->download('Quotation.pdf');
+        $job = Job::find($jobId);
+        if ($job == '') {
+            return response()->json([
+                'status' => 400,
+                'message' => 'This job does not exist',
+                'data' => []
+            ], 400);
+        }
+
+        $user = User::find($job->userId);
+
+        $q = Quotation::where('jobId', $jobId)->first();
+
+        if ($q == "") {
+            return response()->json([
+                'status' => 200,
+                'message' => 'Quotation not be found',
+            ], 200);
+        }
+        $job->currency = User::find($request->userID)->currency;
+        $job->quotation = [
+            'quotationDetails' => $q,
+            'items' => [
+                'totalNumber' => Item::where('jobId', $jobId)->count(),
+                'totalAmount' => Item::where('jobId', $jobId)->get('totalPrice')->sum('totalPrice'),
+                'itemList' => Item::where('jobId', $jobId)->get(),
+            ],
+
+            'tax' => [
+                'totalAmount' => Payment::where('jobId', $jobId)->where('paymentType', 'tax')->get('amount')->sum('amount'),
+                'totalNumber' => Payment::where('jobId', $jobId)->where('paymentType', 'tax')->count(),
+                'taxList' => Payment::where('jobId', $jobId)->where('paymentType', 'tax')->get()
+            ],
+            'discount' => [
+                'totalAmount' => Payment::where('jobId', $jobId)->where('paymentType', 'discount')->get('amount')->sum('amount'),
+                'totalNumber' => Payment::where('jobId', $jobId)->where('paymentType', 'discount')->count(),
+                'discountList' => Payment::where('jobId', $jobId)->where('paymentType', 'discount')->get()
+            ]
+        ];
+        return view('quotationtemplate1', ['type' => $type, 'job' => $job, 'user' => $user]);
     }
 }

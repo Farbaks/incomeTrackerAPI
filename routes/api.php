@@ -20,8 +20,7 @@ use App\Http\Controllers\JobController;
 Route::post('users/signup', [UserController::class, 'signup']);
 Route::post('users/signin', [UserController::class, 'signin']);
 Route::post('users/reset', [UserController::class, 'resetPassword']); 
-
-Route::get('quotation', [JobController::class, 'downloadQuotation']); 
+// Route::get('quotation/{id}', [JobController::class, 'viewQuotation']);
 
 Route::middleware('user-auth')->group(function () {
     // User api
@@ -29,14 +28,17 @@ Route::middleware('user-auth')->group(function () {
     Route::get('user/', [UserController::class, 'getThisUser']);
     Route::get('users/{id}', [UserController::class, 'getOneUser']);
     Route::post('users/', [UserController::class, 'updateUser']);
-    Route::post('users/profilepicture', [UserController::class, 'updateProfilePicture']);
-    Route::post('users/removeprofilepicture', [UserController::class, 'deleteProfilePicture']);
+    Route::post('users/logo', [UserController::class, 'updateLogo']);
+    Route::delete('users/logo', [UserController::class, 'deleteLogo']);
     Route::post('users/password', [UserController::class, 'changePassword']); 
     Route::post('users/signout', [UserController::class, 'signout']); 
+    Route::post('users/token', [UserController::class, 'checkToken']);
 
     // Jobs api
     Route::post('jobs/new', [JobController::class, 'createJob']);
+    Route::put('jobs/status', [JobController::class, 'editJobStatus']);
     Route::put('jobs/', [JobController::class, 'editJob']);
+    Route::delete('jobs/{id}', [JobController::class, 'deleteJob']);
     Route::post('jobs/', [JobController::class, 'getAllJobs']);
     Route::get('job/{id}', [JobController::class, 'getJob']);
     Route::post('quotation/new', [JobController::class, 'createQuotation']);
