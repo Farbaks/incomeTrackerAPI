@@ -612,8 +612,8 @@ class JobController extends Controller
         }
         $report['report'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
             ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
-            ->selectRaw('month(jobs.created_at) as month')
-            ->selectRaw('year(jobs.created_at) as year')
+            ->selectRaw('extract(month from jobs.created_at) as month')
+            ->selectRaw('extract(year from jobs.created_at) as year')
             ->selectRaw('count(jobs.id) as numOfJobs')
             ->selectRaw('sum(quotations.profit) as income')
             ->groupBy('month', 'year')
