@@ -616,7 +616,7 @@ class JobController extends Controller
             ->selectRaw('extract(year from jobs.created_at) as year')
             ->selectRaw('count(jobs.id) as numOfJobs')
             ->selectRaw('sum(quotations.profit) as income')
-            ->groupBy('month', 'year')
+            ->groupByRaw('extract(month from jobs.created_at), extract(year from jobs.created_at)')
             ->latest('jobs.created_at')
             ->get();
 
