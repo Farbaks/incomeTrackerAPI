@@ -13,6 +13,7 @@ use App\Models\Job;
 use App\Models\Quotation;
 use App\Models\Item;
 use App\Models\Payment;
+use Illuminate\Support\Facades\DB;
 use Event;
 use App\Events\ResetPassword;
 use PDF;
@@ -610,14 +611,16 @@ class JobController extends Controller
         if ($check != "") {
             $report['currency'] = User::find($request->userID)->currency;
         }
-        $report['report'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
+        $r = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
             ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
-            ->selectRaw('extract(month from jobs.created_at) as month')
-            ->selectRaw('extract(year from jobs.created_at) as year')
-            ->selectRaw('count(jobs.id) as numOfJobs')
-            ->selectRaw('sum(quotations.profit) as income')
-            ->groupByRaw('extract(month from jobs.created_at), extract(year from jobs.created_at)')
-            ->latest('jobs.created_at')
+            ->selectRaw('extract(month from jobs.updated_at) as month')
+            ->selectRaw('extract(year from jobs.updated_at) as year')
+            ->selectRaw('quotations.profit as income')
+            ->latest('jobs.updated_at');
+        $report['report'] = DB::table(DB::raw("({$r->toSql()}) as n1"))
+            ->mergeBindings($r->getQuery())
+            ->selectRaw('month, year, sum(income) as income')
+            ->groupBy('month', 'year')
             ->get();
 
         return response()->json([
