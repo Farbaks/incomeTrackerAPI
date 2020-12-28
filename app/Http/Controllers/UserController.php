@@ -92,9 +92,7 @@ class UserController extends Controller
             'status' => 200,
             'message' => 'User account has been created',
             'apiToken' => $this->generateAPI($user->id, $request->deviceId),
-            'data' => [
-                $user
-            ]
+            'data' => $user
         ], 200);
     }
 
@@ -152,52 +150,7 @@ class UserController extends Controller
             'status' => 200,
             'message' => 'Login succesful',
             'apiToken' => $this->generateAPI($user->id, $request->deviceId),
-            'data' => [
-                $user
-            ]
-        ], 200);
-
-
-        if ($data->fails()) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'All fields are required',
-                'data' => []
-            ], 400);
-        }
-
-        if ($request->id != $request->userID) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Not authorized to carry out this action',
-                'data' => []
-            ], 400);
-        }
-
-        $name = $request->id . ".jpg";
-        $path = $request->file('avatar')->storeAs('avatars', $name, 'public');
-        User::find($request->id)->update([
-            'pictureUrl' => asset('storage/' . $path)
-        ]);
-        $user = User::find($request->id);
-        $user->totalTobs = Job::where('userId', $user->id)->count();
-        $user->pendingJobs = Job::where('userId', $user->id)
-            ->where('status', '!=', 'completed')
-            ->where('status', '!=', 'canceled')
-            ->count();
-        $user->completedJobs = Job::where('userId', $user->id)
-            ->where('status', 'completed')
-            ->count();
-        $user->canceledJobs =  Job::where('userId', $user->id)
-            ->where('status', 'canceled')
-            ->count();
-        return response()->json([
-            'status' => 200,
-            'message' => 'User account has been updated',
-            'data' => [
-                // User::find($request->id)->only('id', 'name', 'email', 'phoneNumber','bio', 'pictureUrl'),
-                $user
-            ]
+            'data' => $user
         ], 200);
     }
 
@@ -218,7 +171,7 @@ class UserController extends Controller
     }
 
     // Function to check Token Validity
-    public function checkToken(Request $request)
+    public function checkToken()
     {
         return response()->json([
             'status' => 200,
@@ -227,7 +180,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function getAllUsers(Request $request)
+    public function getAllUsers()
     {
         $token = Str::random(60);
         $users = User::all();
@@ -392,34 +345,41 @@ class UserController extends Controller
             ], 400);
         }
 
-        $image = $request->logo;  
+        $image = $request->logo;
         $image = str_replace('data:image/png;base64,', '', $image);
         $image = str_replace(' ', '+', $image);
         $name = $request->userID . ".png";
-        Storage::put('avatars/' . $name, base64_decode($image), 'public');
-        $url = Storage::url('avatars/' . $name);
+        if (Storage::put('avatars/' . $name, base64_decode($image), 'public')) {
+            $url = Storage::url('avatars/' . $name);
 
-        User::find($request->userID)->update([
-            'pictureUrl' => asset($url)
-        ]);
-
-        $user = User::find($request->userID);
-        $user->totalTobs = Job::where('userId', $request->userID)->count();
-        $user->pendingJobs = Job::where('userId', $request->userID)
-            ->where('status', '!=', 'completed')
-            ->where('status', '!=', 'canceled')
-            ->count();
-        $user->completedJobs = Job::where('userId', $request->userID)
-            ->where('status', 'completed')
-            ->count();
-        $user->canceledJobs =  Job::where('userId', $request->userID)
-            ->where('status', 'canceled')
-            ->count();
-        return response()->json([
-            'status' => 200,
-            'message' => 'User logo has been updated',
-            'data' => [$user]
-        ], 200);
+            User::find($request->userID)->update([
+                'pictureUrl' => asset($url)
+            ]);
+            $user = User::find($request->userID);
+            $user->totalTobs = Job::where('userId', $request->userID)->count();
+            $user->pendingJobs = Job::where('userId', $request->userID)
+                ->where('status', '!=', 'completed')
+                ->where('status', '!=', 'canceled')
+                ->count();
+            $user->completedJobs = Job::where('userId', $request->userID)
+                ->where('status', 'completed')
+                ->count();
+            $user->canceledJobs =  Job::where('userId', $request->userID)
+                ->where('status', 'canceled')
+                ->count();
+            return response()->json([
+                'status' => 200,
+                'message' => 'User logo has been updated',
+                'data' => $user
+            ], 200);
+        }
+        else {
+            return response()->json([
+                'status' => 400,
+                'message' => 'User logo could not be updated',
+                'data' => []
+            ], 400);
+        }
     }
 
     // function to delete user logo
@@ -446,7 +406,7 @@ class UserController extends Controller
         return response()->json([
             'status' => 200,
             'message' => 'Logo has been removed successfully',
-            'data' => [$user]
+            'data' => $user
         ], 200);
     }
 
@@ -533,7 +493,7 @@ class UserController extends Controller
         return response()->json([
             'status' => 200,
             'message' => 'User password has been updated',
-            'data' => [$user]
+            'data' => $user
         ], 200);
     }
 
