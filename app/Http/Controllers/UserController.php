@@ -219,13 +219,13 @@ class UserController extends Controller
         $user->totalTobs = Job::where('userId', $user->id)->count();
         $user->pendingJobs = Job::where('userId', $user->id)
             ->where('status', '!=', 'Completed')
-            ->where('status', '!=', 'cancelled')
+            ->where('status', '!=', 'Cancelled')
             ->count();
         $user->completedJobs = Job::where('userId', $user->id)
             ->where('status', 'Completed')
             ->count();
         $user->canceledJobs =  Job::where('userId', $user->id)
-            ->where('status', 'cancelled')
+            ->where('status', 'Cancelled')
             ->count();
         return response()->json([
             'status' => 200,
@@ -248,13 +248,13 @@ class UserController extends Controller
         $user->totalTobs = Job::where('userId', $user->id)->count();
         $user->pendingJobs = Job::where('userId', $user->id)
             ->where('status', '!=', 'Completed')
-            ->where('status', '!=', 'cancelled')
+            ->where('status', '!=', 'Cancelled')
             ->count();
         $user->completedJobs = Job::where('userId', $user->id)
             ->where('status', 'Completed')
             ->count();
         $user->canceledJobs =  Job::where('userId', $user->id)
-            ->where('status', 'cancelled')
+            ->where('status', 'Cancelled')
             ->count();
         return response()->json([
             'status' => 200,
