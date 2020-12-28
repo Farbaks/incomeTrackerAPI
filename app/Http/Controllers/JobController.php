@@ -601,17 +601,17 @@ class JobController extends Controller
     public function getReport(Request $request)
     {
         $report = [];
-        $report['totalIncome'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
+        $report['totalIncome'] = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'Completed')
             ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
             ->sum('quotations.profit');
-        $check = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
+        $check = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'Completed')
             ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
             ->select('quotations.currency')->first();
         $report['currency'] = null;
         if ($check != "") {
             $report['currency'] = User::find($request->userID)->currency;
         }
-        $r = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'completed')
+        $r = Job::where('jobs.userId', $request->userID)->where('jobs.status', 'Completed')
             ->join('quotations', 'quotations.jobId', '=', 'jobs.id')
             ->selectRaw('extract(month from jobs.updated_at) as month')
             ->selectRaw('extract(year from jobs.updated_at) as year')
