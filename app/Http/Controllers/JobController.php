@@ -672,6 +672,8 @@ class JobController extends Controller
                 'discountList' => Payment::where('jobId', $jobId)->where('paymentType', 'discount')->get()
             ]
         ];
+        // $pdf = PDF::loadView('quotationtemplate1',['type' => $type, 'job' => $job, 'user' => $user]); //load view page
+        // return $pdf->stream($type.'.pdf');
         return view('quotationtemplate1', ['type' => $type, 'job' => $job, 'user' => $user]);
     }
 }

@@ -131,7 +131,7 @@
     </style>
 </head>
 
-<body width='100%' style='margin: 0; padding: 0 !important; background-color: #f1f1f1;'>
+<body width='100%' style='margin: 0; padding: 0 !important; background-color: white;'>
     <center style='width: 100%; background-color: #f1f1f1;'>
         <div style='max-width: 800px; margin: 0 auto;background-color: white !important;' class='email-container'>
             <table align='center' role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='margin: auto;'>
