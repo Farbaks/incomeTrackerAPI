@@ -652,7 +652,7 @@ class JobController extends Controller
                 'message' => 'Quotation not be found',
             ], 200);
         }
-        $job->currency = User::find($request->userID)->currency;
+        $job->currency = $user->currency;
         $job->quotation = [
             'quotationDetails' => $q,
             'items' => [
