@@ -27,7 +27,7 @@ Route::middleware('user-auth')->group(function () {
     Route::get('users/', [UserController::class, 'getAllUsers']);
     Route::get('user/', [UserController::class, 'getThisUser']);
     Route::get('users/{id}', [UserController::class, 'getOneUser']);
-    Route::post('users/', [UserController::class, 'updateUser']);
+    Route::post('users', [UserController::class, 'updateUser']);
     Route::post('users/logo', [UserController::class, 'updateLogo']);
     Route::delete('users/logo', [UserController::class, 'deleteLogo']);
     Route::post('users/password', [UserController::class, 'changePassword']); 
@@ -39,10 +39,10 @@ Route::middleware('user-auth')->group(function () {
     Route::put('jobs/status', [JobController::class, 'editJobStatus']);
     Route::put('jobs/', [JobController::class, 'editJob']);
     Route::delete('jobs/{id}', [JobController::class, 'deleteJob']);
-    Route::post('jobs/', [JobController::class, 'getAllJobs']);
+    Route::post('jobs', [JobController::class, 'getAllJobs']);
     Route::get('job/{id}', [JobController::class, 'getJob']);
     Route::post('quotation/new', [JobController::class, 'createQuotation']);
-    Route::post('quotation/', [JobController::class, 'editQuotation']);
+    Route::post('quotation', [JobController::class, 'editQuotation']);
     Route::get('jobs/report', [JobController::class, 'getReport']); 
     
 });
