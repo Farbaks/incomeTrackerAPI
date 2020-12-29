@@ -17,13 +17,14 @@
             padding: 0 !important;
             height: 100% !important;
             width: 100% !important;
-            background: #f1f1f1;
+            background: white;
         }
 
         /* What it does: Stops email clients resizing small text. */
         * {
             -ms-text-size-adjust: 100%;
             -webkit-text-size-adjust: 100%;
+            /* font-family: "DejaVu Sans Mono", monospace; */
         }
 
         /* What it does: Centers email on Android 4.4 */
@@ -39,8 +40,14 @@
             margin: 0 auto !important;
         }
 
+        th {
+            font-size: .78em !important;
+        }
         td {
-            font-size: .85em !important;
+            font-size: .68em !important;
+        }
+        td p {
+            padding-bottom: 5px !important;
         }
 
         @media only screen and (min-device-width: 320px) and (max-device-width: 374px) {
@@ -84,7 +91,6 @@
         body {
             /* font-family: 'Poppins', sans-serif; */
             font-weight: 400;
-            font-size: 15px;
             line-height: 1.8;
         }
 
@@ -132,7 +138,7 @@
 </head>
 
 <body width='100%' style='margin: 0; padding: 0 !important; background-color: white;'>
-    <center style='width: 100%; background-color: #f1f1f1;'>
+    <center style='width: 100%; background-color: white;'>
         <div style='max-width: 800px; margin: 0 auto;background-color: white !important;' class='email-container'>
             <table align='center' role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='margin: auto;'>
                 <tr>
@@ -149,15 +155,20 @@
                         <table style="width: 100%;">
                             <tr>
                                 <td style="text-align: left;">
-                                    <img src="{{ $user['pictureUrl'] ||null }}" style='width:130px;align-items: center;' class='CToWUd'>
+                                    @if ($user['pictureUrl'] != NULL)
+                                    <img src="{{ $user['pictureUrl'] }}" style='width:130px;align-items: center;' class='CToWUd'>
+                                    @endif
+                                    
                                 </td>
                                 <td style="text-align: right;">
                                     <p>Date: {{ $job->quotation['quotationDetails']['updated_at']->format('d/m/y')}}</p>
+                                    <br>
                                     @if ($type == "quotation")
-                                    <p>Quotation No: {{ $job->quotation['quotationDetails']['id']}}</p>
+                                    <p>Quotation No: QUO_{{ $job->id}}{{ $job->quotation['quotationDetails']['id']}}</p>
+                                    <br>
                                     <p>Quotation Validity: {{ $job->quotation['quotationDetails']['quotationValidity'] }} days</p>
                                     @else
-                                    <p>Invoice No: {{ $job->quotation['quotationDetails']['id']}}</p>
+                                    <p>Invoice No: INV_{{ $job->id}}{{ $job->quotation['quotationDetails']['id']}}</p>
                                     @endif
                                 </td>
                             </tr>
@@ -170,14 +181,20 @@
                             <tr>
                                 <td style="text-align: left;">
                                     <p>From: {{ $user['companyName'] }}</p>
+                                    <br>
                                     <p>{{ $user['companyAddress'] }}</p>
+                                    <br>
                                     <p>{{ $user['phoneNumber'] }}</p>
+                                    <br>
                                     <p>{{ $user['email'] }}</p>
                                 </td>
                                 <td style="text-align: right;">
                                     <p>To: {{ $job['contactName'] }}</p>
+                                    <br>
                                     <p>{{ $job['companyName'] }}</p>
+                                    <br>
                                     <p>{{ $job['companyAddress'] }}</p>
+                                    <br>
                                     <p>{{ $job['contactNumber'] }}</p>
                                     <!-- <p>[E-mail]</p> -->
                                 </td>
@@ -230,9 +247,9 @@
                         <table style='width: 100%;'>
                             <thead>
                                 <tr>
-                                    <th style='width:30px;padding: 7px; background-color: teal;color: white; border-right: solid 1px white;text-align: left;'>
+                                    <!-- <th style='width:30px;padding: 7px; background-color: teal;color: white; border-right: solid 1px white;text-align: left;'>
                                         S/N
-                                    </th>
+                                    </th> -->
                                     <th style='padding: 7px; background-color: teal;color: white; border-right: solid 1px white;text-align: left;'>
                                         Description
                                     </th>
@@ -242,10 +259,10 @@
                                     <th style='padding: 7px; background-color: teal;color: white; border-right: solid 1px white;text-align: left;'>
                                         Unit Price
                                     </th>
-                                    <th style='padding: 7px; background-color: teal;color: white; border-right: solid 1px white;text-align: left;'>
+                                    <th style='width:40px;padding: 7px; background-color: teal;color: white; border-right: solid 1px white;text-align: left;'>
                                         Quantity
                                     </th>
-                                    <th style='padding: 7px; background-color: teal;color: white; border-right: solid 1px white;text-align: left;'>
+                                    <th style='width:130px;padding: 7px; background-color: teal;color: white; border-right: solid 1px white;text-align: left;'>
                                         Amount
                                     </th>
                                 </tr>
@@ -253,9 +270,9 @@
                             <tbody>
                                 @foreach ($job->quotation['items']['itemList'] as $item)
                                 <tr>
-                                    <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
+                                    <!-- <td style='width:30px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
                                         {{ $loop->index + 1 }}
-                                    </td>
+                                    </td> -->
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: left;'>
                                         {{ $item->itemName }}
                                     </td>
@@ -265,10 +282,10 @@
                                     <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
                                         {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($item->unitPrice, 2) }}
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: center;'>
+                                    <td style='width:40px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); border: solid 1px rgb(230,230,230);text-align: right;'>
                                         {{ $item->quantity }}
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                    <td style='width:130px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
                                         {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($item->totalPrice, 2)  }}
                                     </td>
                                 </tr>
@@ -282,42 +299,42 @@
                         <table style='width: 100%;'>
                             <tbody>
                                 <tr>
-                                    <td style="width:30px;padding: 7px;"></td>
+                                    <!-- <td style="width:30px;padding: 7px;"></td> -->
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
                                         <strong>Sub Total:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                    <td style='width:130px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
                                         {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($job->quotation['quotationDetails']['subTotalJobCost'], 2)  }}
                                     </td>
                                 </tr>
                                 @foreach ($job->quotation['tax']['taxList'] as $tax)
                                 <tr>
-                                    <td style="width:30px;padding: 7px;"></td>
+                                    <!-- <td style="width:30px;padding: 7px;"></td> -->
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
                                         <strong>{{ $tax->paymentName }}:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
-                                        {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($tax->amount, 2)  }}
+                                    <td style='width:130px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        + {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($tax->amount, 2)  }}
                                     </td>
                                 </tr>
                                 @endforeach
                                 @foreach ($job->quotation['discount']['discountList'] as $discount)
                                 <tr>
-                                    <td style="width:30px;padding: 7px;"></td>
+                                    <!-- <td style="width:30px;padding: 7px;"></td> -->
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
                                         <strong>{{ $discount->paymentName }}:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
-                                        {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($discount->amount, 2)  }}
+                                    <td style='width:130px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                        - {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($discount->amount, 2)  }}
                                     </td>
                                 </tr>
                                 @endforeach
                                 <tr>
-                                    <td style="width:30px;padding: 7px;"></td>
+                                    <!-- <td style="width:30px;padding: 7px;"></td> -->
                                     <td style='padding: 7px; background-color: rgb(255,255,255);color: rgb(100,100,100); border: none;text-align: right;' colspan="4">
                                         <strong>Total:</strong>
                                     </td>
-                                    <td style='padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
+                                    <td style='width:130px;padding: 7px; background-color: rgb(245,245,245);color: rgb(100,100,100); font-weight: 500; border: solid 1px rgb(230,230,230);text-align: right;'>
                                         {{ $job->quotation['quotationDetails']['currency'] }} {{ number_format($job->quotation['quotationDetails']['totalJobCost'], 2)  }}
                                     </td>
                                 </tr>
